@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Latest NASA Earth Indicators with a two-year outlook to 2028, El Niño context and a CO2 forecast back-test.">
+<title>Earth Watch 2026–28</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: instrument-panel dashboard — ENSO strip, verdict, indicator grid, two forecast charts, method + back-test, sources */
+:root{
+  --bg:#f3f6f7; --surface:#ffffff; --ink:#122a33; --ink-2:#44606a; --muted:#6f8a93;
+  --line:#d6e1e4; --accent:#0b6e86; --accent-soft:#d5ebf0; --band:rgba(11,110,134,.16);
+  --rise:#b4441c; --rise-soft:#f7e3d9; --fall:#2856a8; --fall-soft:#dfe7f6; --hold:#7a6a12; --hold-soft:#f2edcf;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1a1f; --surface:#132730; --ink:#e3eef1; --ink-2:#a9c0c7; --muted:#7f9aa2;
+  --line:#25404a; --accent:#4fb8d1; --accent-soft:#163b47; --band:rgba(79,184,209,.20);
+  --rise:#f08a5d; --rise-soft:#3b2219; --fall:#86a9ec; --fall-soft:#1b2a45; --hold:#d8c35a; --hold-soft:#33301a;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1a1f; --surface:#132730; --ink:#e3eef1; --ink-2:#a9c0c7; --muted:#7f9aa2;
+  --line:#25404a; --accent:#4fb8d1; --accent-soft:#163b47; --band:rgba(79,184,209,.20);
+  --rise:#f08a5d; --rise-soft:#3b2219; --fall:#86a9ec; --fall-soft:#1b2a45; --hold:#d8c35a; --hold-soft:#33301a;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;line-height:1.05}
+h2{font-size:1.35rem;font-weight:700}
+h3{font-size:1rem;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--ink-2);max-width:68ch}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+header{display:flex;flex-direction:column;gap:10px}
+.enso{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.enso .tag{font-family:var(--f-mono);font-size:.78rem;font-weight:600;background:var(--rise-soft);color:var(--rise);padding:4px 10px;border-radius:999px}
+.enso .kv{display:flex;flex-direction:column}
+.enso .kv b{font-family:var(--f-mono);font-size:1.15rem}
+.enso .kv span{font-size:.8rem;color:var(--muted)}
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.vbox{border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);background:var(--surface)}
+.vbox ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:.88rem;font-weight:600;padding:4px 10px;border-radius:999px}
+.chip.rise{background:var(--rise-soft);color:var(--rise)}
+.chip.fall{background:var(--fall-soft);color:var(--fall)}
+.chip.hold{background:var(--hold-soft);color:var(--hold)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.card .val{font-family:var(--f-mono);font-size:1.6rem;font-weight:600;line-height:1.1}
+.card .val small{font-size:.8rem;color:var(--muted);font-weight:400}
+.card .date{font-size:.82rem;color:var(--muted)}
+.card .fc{border-top:1px dashed var(--line);padding-top:8px;font-size:.92rem;color:var(--ink-2)}
+.card .fc b{font-family:var(--f-mono);color:var(--ink)}
+.card .src{font-size:.8rem}
+.pill{font-family:var(--f-mono);font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.pill.rise{background:var(--rise-soft);color:var(--rise)}
+.pill.fall{background:var(--fall-soft);color:var(--fall)}
+.pill.hold{background:var(--hold-soft);color:var(--hold)}
+.fresh{font-family:var(--f-mono);font-size:.68rem;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .note{font-size:.82rem;color:var(--muted)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--ink-2)}
+.legend i{display:inline-block;width:18px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-family:var(--f-mono);font-size:.78rem;padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%)}
+section{display:flex;flex-direction:column;gap:12px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel ol{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+th.n{text-align:right}
+tr.sum td{font-weight:600;border-bottom:none}
+.sources{font-size:.85rem;color:var(--ink-2);columns:2 300px;gap:24px;margin:0;padding-left:1.1rem}
+.sources li{break-inside:avoid;margin-bottom:6px}
+footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .15s}.card:hover{border-color:var(--accent)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="eyebrow">Planet indicators · latest data as published, checked 5 Nov 2026</span>
+  <h1>Earth Watch 2026–28</h1>
+  <p class="lede">Latest readings of NASA's Earth Indicators with a transparent two-year outlook to late 2028. Each outlook combines the long-term trend with the current El Niño, and is tested against past years before it is trusted.</p>
+</header>
+
+<div class="enso" role="group" aria-label="El Niño status">
+  <span class="tag">El Niño Advisory</span>
+  <div class="kv"><b>+2.1 °C</b><span>Niño-3.4 anomaly, Oct 2026</span></div>
+  <div class="kv"><b>&gt;83%</b><span>chance strong–very strong El Niño persists to Jan–Mar 2027</span></div>
+  <div class="kv"><b>12 Nov 2026</b><span>next NOAA update</span></div>
+</div>
+
+<section aria-labelledby="v-h">
+  <h2 id="v-h">Two-year verdict</h2>
+  <div class="verdict">
+    <div class="vbox"><span class="eyebrow">Likely to rise by late 2028</span>
+      <ul><li class="chip rise">CO₂</li><li class="chip rise">Sea level</li><li class="chip rise">Ocean heat</li><li class="chip rise">Methane</li><li class="chip rise">Global temperature (new record likely in 2027)</li></ul></div>
+    <div class="vbox"><span class="eyebrow">Likely to keep falling</span>
+      <ul><li class="chip fall">Greenland &amp; Antarctic ice mass</li></ul></div>
+    <div class="vbox"><span class="eyebrow">Stays low, varies year to year</span>
+      <ul><li class="chip hold">Arctic sea-ice minimum</li></ul></div>
+  </div>
+</section>
+
+<section aria-labelledby="i-h">
+  <h2 id="i-h">Indicators</h2>
+  <div class="grid" id="cards"></div>
+</section>
+
+<section aria-labelledby="c-h">
+  <h2 id="c-h">Forecast charts</h2>
+  <div class="charts">
+    <div class="chart" id="co2c">
+      <h3>Atmospheric CO₂, annual mean (Mauna Loa)</h3>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Observed</span><span><i style="background:var(--band)"></i>Forecast range</span></div>
+      <svg viewBox="0 0 520 260" role="img" aria-label="CO2 annual mean 2016 to 2025 observed, 2026 to 2028 forecast"></svg>
+      <p class="note">2026 value is the Met Office forecast (429.4 ± 0.6 ppm). 2027 adds an El Niño boost of +2.8 to +3.8 ppm, as after the 2015–16 and 2023–24 events.</p>
+    </div>
+    <div class="chart" id="tc">
+      <h3>Global surface temperature anomaly (°C vs 1951–80)</h3>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Observed (NASA GISTEMP, rounded)</span><span><i style="background:var(--band)"></i>Forecast range</span></div>
+      <svg viewBox="0 0 520 260" role="img" aria-label="Global temperature anomaly 2016 to 2025 observed, 2026 to 2028 forecast"></svg>
+      <p class="note">Global temperature peaks a few months after El Niño peaks: 2016 followed the 2015 event, 2024 followed 2023. The same lag points to 2027.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="m-h">
+  <h2 id="m-h">Method and back-test</h2>
+  <div class="two">
+    <div class="panel">
+      <h3>How the outlook is made</h3>
+      <ol>
+        <li>Take the latest value and date published on each NASA indicator page; never relabel older data as "October 2026".</li>
+        <li>Fit the recent trend (e.g. CO₂ rose 2.61 ppm/yr on average in 2020–25).</li>
+        <li>Adjust for ENSO, the largest source of year-to-year swings: El Niño weakens land carbon sinks and warms the surface.</li>
+        <li>Give a range, not a single number, and widen it where data are sparse or annual.</li>
+        <li>Back-test: forecast past years without looking at them, then compare with what happened.</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h3>Back-test: CO₂ annual mean, 2021–2025</h3>
+      <div class="tbl"><table>
+        <thead><tr><th>Year</th><th class="n">Observed</th><th class="n">Trend-only error</th><th class="n">Trend + ENSO error</th></tr></thead>
+        <tbody id="bt"></tbody>
+      </table></div>
+      <p class="note" style="font-size:.82rem;color:var(--muted)">Trend-only = previous year + mean rise of the five years before. Trend + ENSO = Met Office forecasts issued ahead of each year. Adding ENSO cut the error most in the El Niño year 2024.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="s-h">
+  <h2 id="s-h">Sources</h2>
+  <ol class="sources">
+    <li><a href="https://science.nasa.gov/earth/explore/earth-indicators/" target="_blank" rel="noopener">NASA Earth Indicators</a> (CO₂, methane, sea level, temperature, ice sheets, ocean warming)</li>
+    <li><a href="https://science.nasa.gov/science-research/earth-science/climate-science/sea-ice/arctic-sea-ice-2026-min/" target="_blank" rel="noopener">NASA/NSIDC, Arctic sea ice 2026 minimum</a></li>
+    <li><a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml" target="_blank" rel="noopener">NOAA CPC ENSO Diagnostic Discussion, 8 Oct 2026</a></li>
+    <li><a href="https://www.metoffice.gov.uk/research/climate/seasonal-to-decadal/long-range/forecasts/co2-forecast" target="_blank" rel="noopener">Met Office, Mauna Loa CO₂ forecast for 2026</a></li>
+    <li><a href="https://english.iap.cas.cn/home/lunbo/202601/t20260109_1145531.html" target="_blank" rel="noopener">IAP/CAS, ocean heat content record in 2025</a></li>
+  </ol>
+</section>
+
+<footer>Student project for BCLE214L Global Warming, VIT Chennai, by Boomika S. Outlooks are estimates built from public data, not official NASA or NOAA forecasts. Values update when the source pages update.</footer>
+</div>
+
+<script>
+const cards=[
+ {n:"Atmospheric CO₂",v:"426",u:"ppm",d:"September 2026 (monthly)",f:"monthly",dir:"rise",fc:"Annual mean <b>~435 ppm</b> in 2028 (434.0–436.4)",s:"https://science.nasa.gov/earth/explore/earth-indicators/carbon-dioxide/"},
+ {n:"Global mean sea level",v:"115.8",u:"mm ± 4.0 since 1993",d:"October 2026",f:"monthly",dir:"rise",fc:"<b>~125 mm</b> by Oct 2028 (123–129); El Niño adds a temporary bump",s:"https://science.nasa.gov/earth/explore/earth-indicators/sea-leve/"},
+ {n:"Global temperature",v:"1.19",u:"°C vs 1951–80",d:"2025 annual",f:"annual",dir:"rise",fc:"<b>~1.40 °C</b> in 2027 (1.30–1.50), likely a new record",s:"https://science.nasa.gov/earth/explore/earth-indicators/global-temperature/"},
+ {n:"Ocean heat (0–2000 m)",v:"372",u:"ZJ ± 2 since 1955",d:"December 2024 (5-yr avg)",f:"annual",dir:"rise",fc:"Gains of <b>15–25 ZJ</b> per year (2025: +23 ZJ, a record)",s:"https://science.nasa.gov/earth/explore/earth-indicators/ocean-warming/"},
+ {n:"Methane",v:"1,935",u:"ppb",d:"June 2026",f:"quarterly",dir:"rise",fc:"<b>~1,955 ppb</b> by mid-2028 (1,945–1,965)",s:"https://science.nasa.gov/earth/explore/earth-indicators/methane/"},
+ {n:"Ice sheets",v:"−400",u:"Gt per year (both)",d:"GRACE/GRACE-FO, 2002–2025",f:"monthly",dir:"fall",fc:"<b>~800 Gt</b> more lost by 2028, adding ~2.4 mm to sea level",s:"https://science.nasa.gov/earth/explore/earth-indicators/ice-sheets/"},
+ {n:"Arctic sea-ice minimum",v:"4.60",u:"million km²",d:"12 September 2026",f:"annual",dir:"hold",fc:"<b>4.1–5.0 M km²</b> in 2027–28; no return to 1981–2010 levels",s:"https://science.nasa.gov/science-research/earth-science/climate-science/sea-ice/arctic-sea-ice-2026-min/"}
+];
+const lab={rise:"Rising",fall:"Falling",hold:"Low, variable"};
+document.getElementById("cards").innerHTML=cards.map(c=>`<article class="card">
+ <div class="top"><h3>${c.n}</h3><span class="pill ${c.dir}">${lab[c.dir]}</span></div>
+ <div class="val">${c.v} <small>${c.u}</small></div>
+ <div class="date">${c.d} <span class="fresh">${c.f}</span></div>
+ <p class="fc">${c.fc}</p>
+ <a class="src" href="${c.s}" target="_blank" rel="noopener">NASA source</a></article>`).join("");
+
+const bt=[[2021,416.1,0.52,0.20],[2022,418.2,0.27,0.10],[2023,420.8,-0.27,-0.60],[2024,424.3,-1.06,-0.70],[2025,427.0,-0.12,-0.40]];
+const f=x=>(x>0?"+":"")+x.toFixed(2);
+const mae=i=>(bt.reduce((s,r)=>s+Math.abs(r[i]),0)/bt.length).toFixed(2);
+document.getElementById("bt").innerHTML=bt.map(r=>`<tr><td>${r[0]}${r[0]===2024?" (El Niño)":""}</td><td class="n">${r[1].toFixed(1)}</td><td class="n">${f(r[2])}</td><td class="n">${f(r[3])}</td></tr>`).join("")+
+ `<tr class="sum"><td>Mean abs. error</td><td></td><td class="n">${mae(2)}</td><td class="n">${mae(3)}</td></tr>`;
+
+function chart(id,obs,fc,yMin,yMax,step,unit,dp,dy){
+ const box=document.getElementById(id),svg=box.querySelector("svg"),NS="http://www.w3.org/2000/svg";
+ const W=520,H=260,L=48,R=14,T=12,B=30,x0=2016,x1=2028;
+ const X=y=>L+(y-x0)/(x1-x0)*(W-L-R),Y=v=>T+(1-(v-yMin)/(yMax-yMin))*(H-T-B);
+ const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e};
+ for(let v=yMin;v<=yMax+1e-9;v+=step){el("line",{x1:L,x2:W-R,y1:Y(v),y2:Y(v),stroke:"var(--line)","stroke-width":1});
+  const t=el("text",{x:L-8,y:Y(v)+4,"text-anchor":"end","font-size":11,fill:"var(--muted)","font-family":"var(--f-mono)"});t.textContent=v.toFixed(dp===2?1:0);}
+ for(let y=x0;y<=x1;y+=2){const t=el("text",{x:X(y),y:H-8,"text-anchor":"middle","font-size":11,fill:"var(--muted)","font-family":"var(--f-mono)"});t.textContent=y;}
+ const last=obs[obs.length-1];
+ const band=[[last[0],last[1],last[1]],...fc.map(p=>[p[0],p[2],p[3]])];
+ el("path",{d:"M"+band.map(p=>X(p[0])+","+Y(p[2])).join("L")+"L"+band.slice().reverse().map(p=>X(p[0])+","+Y(p[1])).join("L")+"Z",fill:"var(--band)"});
+ el("path",{d:"M"+[[last[0],last[1]],...fc.map(p=>[p[0],p[1]])].map(p=>X(p[0])+","+Y(p[1])).join("L"),fill:"none",stroke:"var(--accent)","stroke-width":2,"stroke-dasharray":"5 4"});
+ el("path",{d:"M"+obs.map(p=>X(p[0])+","+Y(p[1])).join("L"),fill:"none",stroke:"var(--accent)","stroke-width":2});
+ const pts=[...obs.map(p=>({y:p[0],v:p[1],k:"obs"})),...fc.map(p=>({y:p[0],v:p[1],lo:p[2],hi:p[3],k:"fc"}))];
+ pts.forEach(p=>el("circle",{cx:X(p.y),cy:Y(p.v),r:p.k==="obs"?3:4,fill:p.k==="obs"?"var(--accent)":"var(--surface)",stroke:"var(--accent)","stroke-width":2}));
+ const end=fc[fc.length-1],tl=el("text",{x:X(end[0])-6,y:Y(end[1])+dy,"text-anchor":"end","font-size":12,"font-weight":600,fill:"var(--ink)","font-family":"var(--f-mono)"});tl.textContent=end[1].toFixed(dp)+" "+unit;
+ const cross=el("line",{y1:T,y2:H-B,stroke:"var(--muted)","stroke-width":1,"stroke-dasharray":"2 3",visibility:"hidden"});
+ const tip=document.createElement("div");tip.className="tip";tip.hidden=true;box.appendChild(tip);
+ const hit=el("rect",{x:L,y:T,width:W-L-R,height:H-T-B,fill:"transparent"});
+ function show(evt){const r=svg.getBoundingClientRect(),sx=(evt.clientX-r.left)*W/r.width;let best=pts[0];pts.forEach(p=>{if(Math.abs(X(p.y)-sx)<Math.abs(X(best.y)-sx))best=p});
+  cross.setAttribute("x1",X(best.y));cross.setAttribute("x2",X(best.y));cross.setAttribute("visibility","visible");
+  tip.hidden=false;tip.textContent=best.k==="obs"?`${best.y}  ${best.v.toFixed(dp)} ${unit} observed`:`${best.y}  ${best.v.toFixed(dp)} ${unit} (${best.lo.toFixed(dp)}–${best.hi.toFixed(dp)}) forecast`;
+  const br=box.getBoundingClientRect();tip.style.left=(r.left-br.left+X(best.y)*r.width/W)+"px";tip.style.top=(r.top-br.top+Y(best.v)*r.height/H)+"px";}
+ hit.addEventListener("pointermove",show);hit.addEventListener("pointerdown",show);
+ hit.addEventListener("pointerleave",()=>{tip.hidden=true;cross.setAttribute("visibility","hidden")});
+}
+chart("co2c",[[2016,404.3],[2017,406.6],[2018,408.6],[2019,411.5],[2020,414.0],[2021,416.1],[2022,418.2],[2023,420.8],[2024,424.3],[2025,427.0]],
+ [[2026,429.4,428.8,430.0],[2027,432.6,431.8,433.6],[2028,435.1,434.0,436.4]],400,440,10,"ppm",1,-10);
+chart("tc",[[2016,1.01],[2017,0.92],[2018,0.85],[2019,0.98],[2020,1.01],[2021,0.85],[2022,0.89],[2023,1.17],[2024,1.28],[2025,1.19]],
+ [[2026,1.27,1.20,1.34],[2027,1.40,1.30,1.50],[2028,1.30,1.20,1.42]],0.8,1.6,0.2,"°C",2,24);
+</script>
+</body>
+</html>
